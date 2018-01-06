@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tables Page</title>
+
+  <!-- Latest compiled and minified CSS & JS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+</head>
+<body>
+
+  <div class="container">
+
+    <div class="jumbotron">
+      <h1 class="text-center"><span class="glyphicon glyphicon-fire"></span> Hot Restaurant</h1>
+      <hr>
+      <h2 class="text-center">Current Reservations and Waiting List</h2>
+      <br>
+
+      <div class="text-center">
+        <a href="/reserve"><button type="button" class="btn btn-lg btn-danger"><span class="glyphicon glyphicon-credit-card"></span> Make Reservation</button></a>
+        <a href="/"><button type="button" class="btn btn-lg btn-default"><span class="glyphicon glyphicon-home"></span></button></a>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+
+        <!-- Current Tables in Use -->
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">Current Reservations</h4>
+          </div>
+          <div class="panel-body" id="tableSection">
+          </div>
+        </div>
+
+        <!-- Waiting List Panel -->
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">Waiting List</h4>
+          </div>
+          <div class="panel-body" id="waitlistSection">
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <footer class="footer">
+      <div class="container">
+        <p>Control Panel</p>
+        <p><a href="#" id="clear">Clear Table</a> | <a href="/api/tables">API Table Link</a> | <a href="/api/waitlist">API Wait List</a> | <a href="https://github.com/afhaque/HotRestaurant">GitHub Repo</a></p>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+
+
+<!-- BELOW CODE IS CRITICAL. IT HANDLES HOW FORM DATA IS LOADED FROM OUR SERVER -->
+<script type="text/javascript">
+
+  //Create Function that takes data from our API routes (files inside routing folder) 
+  //and display them to the HTML
+  function runTableQuery() {
+    //Here: Return the protocol, hostname and port number of a URL store it in a variable
+    var currentURL = window.location.origin;
+    //then we do AJAX call to our created API, much like the giphy app
+    $.ajax({
+      url: currentURL + "/api/tables",
+      method: "GET"
+    }).done(function(tableData) {
+
+      // Logging the URL so we have access to it for troubleshooting
+      console.log("---------------IM HERE---------------------");
+      console.log(tableData);
+      console.log("------------------------------------");
+
+      // Loop through and provide the table
+      
+      for (var i = 0; i < tableData.length; i++) {
+          //console.log(tableData[i]);
+          //Add Counter (to make sure we show the right number)
+          
+          //Create the HTML table well (section) and add the reservation name content for each
+          var tableSection = $("<div>");
+          //add class
+          tableSection.addClass("well");
+          //add ID and the number that increments attached to every single list
+          tableSection.attr("id", "table-well-" + i+1);
+          //grab id #tableSection from DOM, append this newly 
+          $("#tableSection").append(tableSection);
+
+          var tableNumber = i + 1;
+
+          $('#table-well-' + i+1).append("<h2><span class='label label-primary'>"+tableNumber+ "|  " + tableData[i].customerName + "</h2>");
+      }
+
+    });
+  }
+  //Create Function that uses jquery to download data from our server
+  function runWaitlistQuery() {
+    //Here: Return the protocol, hostname and port number of a URL store it in a variable
+    var currentURL = window.location.origin;
+    //then we do AJAX call to our created API, much like the giphy app
+    $.ajax({
+      url: currentURL + "/api/waitlist",
+      method: "GET"
+    }).done(function(waitlistData) {
+
+      // Logging the URL so we have access to it for troubleshooting
+      console.log("---------------IM HERE---------------------");
+      console.log(waitlistData);
+      console.log("------------------------------------");
+
+      // Loop through and provide the table
+      
+      for (var i = 0; i < waitlistData.length; i++) {
+          console.log(waitlistData[i]);
+          //Add Counter (to make sure we show the right number)
+          
+          //Create the HTML table well (section) and add the reservation name content for each
+          var waitlistSection = $("<div>");
+          waitlistSection.addClass("well");//add class
+          waitlistSection.attr("id", "waitList-well-" + i+1);//add ID add a number list
+          $("#waitlistSection").append(waitlistSection);//grab id #waitlistSection from DOM, append this newly created DIV
+
+          var tableNumber = i + 1;
+
+          $('#waitList-well-' + i+1).append("<h2><span class='label label-primary'>"+tableNumber+ "|  " + waitlistData[i].customerName + "</h2>");
+
+      }
+
+    });
+  }
+
+    // This function resets all of the data in our tables. 
+    function clearTable() {
+      var currentURL = window.location.origin;
+      $.ajax({ url: currentURL + "/api/clear", method: "POST" });
+    }
+    $("#clear").on("click", function() {
+      alert("Clearing...");
+      clearTable();
+      // Refresh the page after data is cleared
+      location.reload();
+    });
+
+
+    // // Run Queries!
+    // // ==========================================
+    runTableQuery();
+    runWaitlistQuery();
+
+
+</script>
+</html>
